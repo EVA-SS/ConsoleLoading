@@ -1,0 +1,28 @@
+﻿# Build and Release Folders
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+# Other files and folders
+*.csproj.user
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+*.vcxproj.filters
+*.vcxproj.user
+*.pubxml.user
+
+/.vs
+/packages
+/Debug
+/Release
+/Lib/OpenH264Lib/Debug
+/Lib/OpenH264Lib/Release
+/Lib/OpenH264Lib/x64
+/Lib/OpenH264Lib/x86
+/x64
+/x86
