@@ -3,35 +3,35 @@
     public class ConsoleLoading : IDisposable
     {
         public string Txt { get; set; }
-        public string OkTxt { get; set; }
+
         public int Interval = 100;
         public int ProgWidth = 18;
         ConsoleColor old, back;
-        public ConsoleLoading(string txt, string oktxt)
+        public ConsoleLoading(string txt)
         {
             old = Console.ForegroundColor;
             back = Console.BackgroundColor;
             Txt = txt;
-            OkTxt = oktxt;
+            Start();
         }
 
-        public void Begin()
+        void Begin()
         {
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine("   " + Txt);
         }
 
-        public void Start()
+        void Start()
         {
             Console.CursorLeft = 0;
             Console.CursorVisible = false;
             Begin();
-            var top = Console.CursorTop - 1;
+            top = Console.CursorTop - 1;
             Task.Run(() =>
             {
                 while (true)
                 {
-                    if (token == null || token.Token.IsCancellationRequested) return;
+                    if (token.IsCancellationRequested) return;
                     else
                     {
                         Console.SetCursorPosition(0, top);
@@ -67,6 +67,11 @@
                         {
                             Console.ForegroundColor = ConsoleColor.Cyan;
                             Console.Write(Loading);
+                            if (ProgTxt != null)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Write(" " + ProgTxt);
+                            }
                         }
                         Thread.Sleep(Interval);
                     }
@@ -74,22 +79,43 @@
             }).ContinueWith((action =>
             {
                 Console.SetCursorPosition(0, top);
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                var oktxt = "⠿  " + OkTxt;
+                Console.ForegroundColor = endColor;
+                var oktxt = "⠿  " + endTxt;
                 Console.Write("⠿  ");
-                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                Console.BackgroundColor = endColor;
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(OkTxt);
-                Console.CursorVisible = true;
+                Console.Write(endTxt);
                 Console.ForegroundColor = old;
                 Console.BackgroundColor = back;
                 Console.WriteLine(ClearRight(oktxt.Length));
+                Console.CursorVisible = true;
                 Event.Set();
             }));
         }
 
+        ManualResetEvent Event = new ManualResetEvent(false);
+        int top = 0;
+        string? endTxt;
+        ConsoleColor endColor = ConsoleColor.DarkGreen;
+        public void OK(string txt)
+        {
+            End(txt, ConsoleColor.DarkGreen);
+        }
+
+        public void Fail(string txt)
+        {
+            End(txt, ConsoleColor.DarkRed);
+        }
+
+        public void End(string txt, ConsoleColor color)
+        {
+            endTxt = txt;
+            endColor = color;
+            Dispose();
+        }
+
         int temp = -1;
-        public char Loading
+        char Loading
         {
             get
             {
@@ -133,16 +159,15 @@
         #region 释放
 
         CancellationTokenSource token = new CancellationTokenSource();
-        ManualResetEvent Event = new ManualResetEvent(false);
 
         public void Dispose()
         {
-            if (token != null)
+            if (!token.IsCancellationRequested)
             {
                 token.Cancel();
                 Event.WaitOne();
                 token.Dispose();
-                token = null;
+                Event.Dispose();
             }
         }
 

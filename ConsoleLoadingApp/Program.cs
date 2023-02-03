@@ -4,21 +4,28 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("Hello, World!");
-var loading = new ConsoleLoading("Download nuget package", "Download complete") { Interval = 20 };
-loading.Start();
-int errCount = 0;
-while (errCount < 500)
+using (var loading = new ConsoleLoading("Download nuget package") { Interval = 20 })
 {
-    loading.Value += 0.2;
-    Thread.Sleep(5);
-    errCount++;
+    int errCount = 0;
+    while (errCount < 500)
+    {
+        loading.Value += 0.2;
+        Thread.Sleep(5);
+        errCount++;
+    }
+    loading.OK("Download complete");
 }
-loading.Dispose();
 
-loading = new ConsoleLoading("Building for production..", "Build production complete");
-loading.Start();
-
-while (true)
+using (var loading = new ConsoleLoading("Building for production.."))
 {
-    Thread.Sleep(10000);
+    Thread.Sleep(6000);
+    loading.End("Build production complete", ConsoleColor.DarkBlue);
+}
+
+using (var loading = new ConsoleLoading("Building for production.."))
+{
+    while (true)
+    {
+        Thread.Sleep(10000);
+    }
 }
